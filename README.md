@@ -1,5 +1,5 @@
-# pplushie realm community 45x45=2025
+# Grouping Game
 
-45x45=2025 game with custom categories and lists compiled by the pplushie realm community at https://www.twitch.tv/camkatsu. Minor bug fixes and feature edits by Kim-Lan and suite. Categories organized by suite.
+Grouping game based on 2025 by Thomas Colthurst.
 
-Original from https://thomaswc.com/2025.html. UI Updates from [vessenes/2025is45x45](https://github.com/vessenes/2025is45x45).
+Original from https://thomaswc.com/2025.html. UI Updates from [vessenes/2025is45x45](https://github.com/vessenes/2025is45x45). Forked from [Kim-Lan/pplushie-realm-45x45](https://github.com/Kim-Lan/pplushie-realm-45x45).

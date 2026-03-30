@@ -1,8 +1,9 @@
 // Globals
-const M = 45; // Board size
+const M = Object.keys(cats).length; // Board size
 
 let score = 0;
 let mistakes = 0;
+let winningScore = 0;
 
 let selected = null; // The currently selected button, if any.
 
@@ -62,10 +63,6 @@ function pinSelected(button) {
   };
 
   // Add label and clone to pin zone
-  // const label = document.createElement("span");
-  // label.className = "pin-label";
-  // label.textContent = "selected:";
-  // pinZone.appendChild(label);
   pinZone.appendChild(clone);
 
   // Dim the original
@@ -164,18 +161,18 @@ function wireButton(button) {
     if (!didMatch) {
       saveState();
     }
-    if (score >= 1980) {
+    if (score >= winningScore) {
       window.alert("You win!!");
       startFireworks();
     }
   };
 }
 
-function buildClusterSummary(cluster) {
+function buildClusterSummary(cluster, total) {
   if (cluster.length == 2) {
     return `${cluster[0]}; ${cluster[1]}`;
   }
-  return `<span class="cluster-count">[${cluster.length}]</span> ${cluster[0]}, ${cluster[1]}, ... `;
+  return `<span class="cluster-count">[${cluster.length}/${total}]</span> ${cluster[0]}, ${cluster[1]}, ... `;
 }
 
 function updateButtonSearch(button) {
@@ -197,13 +194,14 @@ function updateGlowClass(button) {
     "glow-strong",
     "glow-intense",
   );
-  if (len >= 35) {
+  const total = cats[button.category].length;
+  if (len >= total * 0.75) {
     button.classList.add("glow-intense");
-  } else if (len >= 25) {
+  } else if (len >= total * 0.5) {
     button.classList.add("glow-strong");
-  } else if (len >= 15) {
+  } else if (len >= total * 0.25) {
     button.classList.add("glow-medium");
-  } else if (len >= 5) {
+  } else if (len >= total * 0.1) {
     button.classList.add("glow-mild");
   }
 }
@@ -217,7 +215,7 @@ function setButtonLabel(button) {
     updateGlowClass(button);
     return;
   }
-  const summary = buildClusterSummary(cluster);
+  const summary = buildClusterSummary(cluster, cats[button.category].length);
   const full = cluster.join(", ");
   button.innerHTML = `<div class="cluster-summary">${summary}</div><div class="cluster-full">${full}</div>`;
   updateButtonSearch(button);
@@ -248,7 +246,6 @@ function moveClusterToPriority(button) {
     item.classList.remove("recent");
   });
   wrapper.classList.add("recent");
-  //wrapper.scrollIntoView({ behavior: "smooth", block: "nearest" });
   if (enableSortPriority) {
     sortPriorityLane();
   }
@@ -365,7 +362,7 @@ function performMatch(firstbut, secondbut) {
     },
     { once: true },
   );
-  if (firstbut.cluster.length == 45) {
+  if (firstbut.cluster.length == cats[firstbut.category].length) {
     finishCategory(firstbut);
 	lastGroup = null;
   } else {
@@ -513,7 +510,7 @@ function getRandomHexColor() {
 }
 
 function finishCategory(b) {
-  b.innerHTML = "<b>" + b.category + "</b>";
+  b.firstChild.innerHTML = "<b>" + b.category + "</b>";
   b.disabled = true;
   b.classList.add("completed");
   b.style.background = stringToLightColor(b.category);
@@ -524,20 +521,18 @@ function finishCategory(b) {
 
 function checkCategories() {
   const wordDict = new Map();
-  // Check that each category has 45 entries.
-  for (const [key, value] of Object.entries(cats)) {
-    if (value.length < 45) {
-      alert(`Entry for ${key} has length ${value.length}`);
-    }
-    for (let i = 0; i < 45; i++) {
-      wordlist.push([value[i], key]);
-      if (wordDict.has(value[i])) {
-        alert(`Duplicate word ${value[i]}`);
+
+  for (const [key, cat] of Object.entries(cats)) {
+    for (const el of cat) {
+      wordlist.push([el, key]);
+      if (wordDict.has(el)) {
+        alert(`Duplicate word ${el}`);
       } else {
-        wordDict.set(value[i], true);
+        wordDict.set(el, true);
       }
     }
   }
+  winningScore = wordlist.length;
 }
 
 function shuffleArray(array) {
@@ -792,6 +787,10 @@ function loadState() {
   mistakes = Number(localStorage.getItem("mistakes") || 0);
   document.getElementById("mistakes").textContent = mistakes;
 
+  enableSortPriority = JSON.parse(localStorage.getItem("enableSortPriority"));
+  const toggleSortBtn = document.getElementById("toggle-sort-btn");
+  toggleSortBtn.textContent = enableSortPriority ? "disable sort" : "enable sort";
+
   const matchedList = document.getElementById("priority-lane");
   matchedList.innerHTML = "";
   const storedPanel = localStorage.getItem("panelClusters");
@@ -803,8 +802,8 @@ function loadState() {
           return;
         }
         const button = createClusterButton(block.category, block.cluster);
-        if (block.cluster.length == 45) {
-		  button.innerHTML = "<b>" + button.category + "</b>";
+        if (block.cluster.length == cats[block.category].length) {
+          button.firstChild.innerHTML = "<b>" + button.category + "</b>";
           button.disabled = true;
           button.classList.add("completed");
           button.style.background = stringToLightColor(block.category);
@@ -855,7 +854,13 @@ function loadState() {
   }
 }
 
+function setTitle() {
+  const title = document.getElementById("title");
+  title.textContent = `make ${M} groups !`;
+}
+
 checkCategories();
+setTitle();
 setUpBoard();
 loadState();
 document.getElementById("filter-input").addEventListener("input", applyFilter);
@@ -990,7 +995,11 @@ function selectLastItem(event) {
 const toggleSortBtn = document.getElementById("toggle-sort-btn");
 toggleSortBtn.onclick = () => {
   enableSortPriority = !enableSortPriority;
+  localStorage.setItem("enableSortPriority", JSON.stringify(enableSortPriority));
   if (enableSortPriority) {
+    toggleSortBtn.textContent = "disable sort";
     sortPriorityLane();
+  } else {
+    toggleSortBtn.textContent = "enable sort";
   }
 }
