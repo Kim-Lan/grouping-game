@@ -523,6 +523,9 @@ function checkCategories() {
   const wordDict = new Map();
 
   for (const [key, cat] of Object.entries(cats)) {
+    if (cat.length <= 1) {
+      alert(`category ${key} must have at least 2 elements`);
+    }
     for (const el of cat) {
       wordlist.push([el, key]);
       if (wordDict.has(el)) {
@@ -585,8 +588,10 @@ function putWordsInBoard() {
     for (let j = 0, col; (col = row.cells[j]); j++) {
       var button = col.firstElementChild;
       // button.pos = currentWordIndex;
-      button.textContent = wordlist[currentWordIndex][0];
-      button.category = wordlist[currentWordIndex][1];
+      if (currentWordIndex < wordlist.length) {
+        button.textContent = wordlist[currentWordIndex][0];
+        button.category = wordlist[currentWordIndex][1];
+      }
       button.cluster = [button.textContent];
       setButtonLabel(button);
       currentWordIndex += 1;
@@ -754,20 +759,34 @@ function startFireworks() {
 
 function setUpBoard() {
   // Just sets up the dom elements; does not put words in them.
-  var b = document.getElementById("board");
+  const b = document.getElementById("board");
   const table = document.createElement("table");
   table.id = "the_table";
-  for (let i = 0; i < M; i++) {
+
+  const cols = Math.ceil(Math.sqrt(wordlist.length));
+  const rows = Math.ceil(wordlist.length / cols);
+  let currentIndex = 0;
+
+  // console.log(`rows: ${rows}`);
+  // console.log(`cols: ${cols}`);
+  if (rows * cols < wordlist.length) {
+    alert("error: not enough table cells");
+  }
+
+  for (let i = 0; i < rows; i++) {
     const tr = document.createElement("tr");
     tr.classList.add(".row");
-    for (let j = 0; j < M; j++) {
-      const td = document.createElement("td");
-      td.className = "tile-cell";
-      const button = document.createElement("button");
-      button.className = "bigbut";
-      wireButton(button);
-      td.appendChild(button);
-      tr.appendChild(td);
+    for (let j = 0; j < cols; j++) {
+      if (currentIndex < wordlist.length) {
+        const td = document.createElement("td");
+        td.className = "tile-cell";
+        const button = document.createElement("button");
+        button.className = "bigbut";
+        wireButton(button);
+        td.appendChild(button);
+        tr.appendChild(td);
+      }
+      currentIndex++;
     }
     table.appendChild(tr);
   }
