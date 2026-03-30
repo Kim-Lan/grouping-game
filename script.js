@@ -1,5 +1,5 @@
 // Globals
-const M = Object.keys(cats).length; // Board size
+const M = Object.keys(cats).length; // number of categories
 
 let score = 0;
 let mistakes = 0;
@@ -201,7 +201,7 @@ function updateGlowClass(button) {
     button.classList.add("glow-strong");
   } else if (len >= total * 0.25) {
     button.classList.add("glow-medium");
-  } else if (len >= total * 0.1) {
+  } else if (len >= Math.max(total * 0.1, 2)) {
     button.classList.add("glow-mild");
   }
 }
