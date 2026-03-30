@@ -535,7 +535,7 @@ function checkCategories() {
       }
     }
   }
-  winningScore = wordlist.length;
+  winningScore = wordlist.length - M;
 }
 
 function shuffleArray(array) {
