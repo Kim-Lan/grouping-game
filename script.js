@@ -1,3 +1,5 @@
+import 'https://kim-lan.github.io/github-pages-local-storage/index.js'
+
 // Globals
 const M = Object.keys(cats).length; // number of categories
 
@@ -285,14 +287,6 @@ function bumpStat(id) {
   el.classList.remove("score-pop");
   void el.offsetWidth;
   el.classList.add("score-pop");
-}
-
-function clearSearch() {
-  const input = document.getElementById("filter-input");
-  if (!input) {
-    return;
-  }
-  input.value = "";
 }
 
 function sortPriorityLane() {
